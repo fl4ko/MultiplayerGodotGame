@@ -1,15 +1,33 @@
 extends CharacterBody2D
 
 @export var projectile: PackedScene
+@export var starting_gun: PackedScene
 
 @onready var gun: Node2D = $Gun
 @onready var gun_sprite: Sprite2D = $Gun/GunSprite
 @onready var projectile_spawn: Node2D = $Gun/ProjectileSpawn
+@onready var player: CharacterBody2D = $"."
 
 const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+const JUMP_VELOCITY = -700.0
 
 var facing_right:bool = true
+var is_holding_gun: bool = false
+
+func _ready() -> void:
+	add_to_group("player")
+	equip_staring_gun()
+
+func equip_staring_gun():
+	for child in gun.get_children():
+		child.queue_free()
+		
+	var gun_instance = starting_gun.instantiate()
+	$Gun.add_child(gun_instance)
+	
+	gun_sprite = gun_instance.get_node("GunSprite")
+	projectile_spawn = gun_instance.get_node("ProjectileSpawn")
+	is_holding_gun = true
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
@@ -20,7 +38,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	if Input.is_action_just_pressed("Shoot"):
+	if Input.is_action_just_pressed("Shoot") and is_holding_gun:
 		fire_projectile()
 
 	# Get the input direction and handle the movement/deceleration.
@@ -55,3 +73,9 @@ func fire_projectile():
 	# Position the projectile at the gun's position
 	projectile.position = projectile_spawn.global_position
 	get_parent().add_child(projectile)
+
+func handle_being_hit():
+	handle_death()
+
+func handle_death():
+	queue_free()

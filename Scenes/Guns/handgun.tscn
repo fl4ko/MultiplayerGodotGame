@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://81seqsor1khd"]
+
+[ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_b1afo"]
+[ext_resource type="Texture2D" uid="uid://bbls7kquxww0t" path="res://MultiplayerGodotGame/Resources/Sprites/handgun.png" id="2_75x4l"]
+
+[node name="Handgun" instance=ExtResource("1_b1afo")]
+gun_texture = ExtResource("2_75x4l")
+projectile_type = "standard"

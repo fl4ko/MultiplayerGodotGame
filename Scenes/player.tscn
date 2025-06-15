@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://b4a3ath00b0f4"]
+[gd_scene load_steps=6 format=3 uid="uid://b4a3ath00b0f4"]
 
 [ext_resource type="Texture2D" uid="uid://x0uf71c1565c" path="res://MultiplayerGodotGame/Resources/Sprites/temp_sprite.png" id="1_rpmp3"]
 [ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/player.tres.gd" id="1_snot6"]
-[ext_resource type="Texture2D" uid="uid://bbls7kquxww0t" path="res://MultiplayerGodotGame/Resources/Sprites/handgun.png" id="2_msrsf"]
+[ext_resource type="PackedScene" uid="uid://w81dlxbrp7w8" path="res://MultiplayerGodotGame/Scenes/Guns/rifle.tscn" id="2_c3jo2"]
+[ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="3_vf3v6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0aun1"]
 radius = 8.0
@@ -11,23 +12,15 @@ height = 32.0
 [node name="Player" type="CharacterBody2D"]
 scale = Vector2(2.7, 2.7)
 script = ExtResource("1_snot6")
+starting_gun = ExtResource("2_c3jo2")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 3
 scale = Vector2(1.54239, 1.54239)
 texture = ExtResource("1_rpmp3")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionBox" type="CollisionShape2D" parent="."]
 position = Vector2(0, -2)
 shape = SubResource("CapsuleShape2D_0aun1")
 
-[node name="Gun" type="Node2D" parent="."]
-
-[node name="GunSprite" type="Sprite2D" parent="Gun"]
-texture_filter = 3
-position = Vector2(9.83, -2.38419e-07)
-scale = Vector2(0.94, 0.94)
-texture = ExtResource("2_msrsf")
-
-[node name="ProjectileSpawn" type="Node2D" parent="Gun"]
-position = Vector2(19.6296, -4.44444)
+[node name="Gun" parent="." instance=ExtResource("3_vf3v6")]
