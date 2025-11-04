@@ -75,7 +75,7 @@ starting_gun = ExtResource("2_h3krl")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_0uh74")
-animation = &"jump"
+speed_scale = 3.0
 
 [node name="CollisionBox" type="CollisionShape2D" parent="."]
 position = Vector2(0.555555, 2.96296)

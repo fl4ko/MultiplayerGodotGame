@@ -9,8 +9,11 @@ extends CharacterBody2D
 @onready var player: CharacterBody2D = $"."
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -700.0
+@export var speed: float = 230.0
+@export_range(0, 1) var deceleration: float = 0.4
+@export_range(0, 1) var acceleration: float = 0.4
+@export var jump_height: float = -700.0
+@export_range(0, 1) var jump_timing: float = 0.5
 
 var current_gun: Node = null
 
@@ -43,12 +46,14 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+	if Input.is_action_just_pressed("Jump") and is_on_floor():
+		velocity.y = jump_height
 		play_animation("jump")
 
-	# Handle shooting
+	if Input.is_action_just_released("Jump") and velocity.y < 0:
+		velocity.y *= jump_timing
 
+	# Handle shooting
 	if Input.is_action_just_pressed("Shoot") and is_holding_gun:
 		current_gun.start_firing()
 
@@ -62,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	# As good practice, you should replace UI actions with custom gameplay actions.
 	var direction := Input.get_axis("ui_left", "ui_right")
 	if direction:
-		velocity.x = direction * SPEED
+		velocity.x = move_toward(velocity.x, direction * speed, speed * acceleration)
 		
 		if direction > 0 and not facing_right:
 			flip_sprite(true)
@@ -72,7 +77,7 @@ func _physics_process(delta: float) -> void:
 		if is_on_floor() and anim.animation != "run":
 			play_animation("run")
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0, speed * deceleration)
 		if is_on_floor() and anim.animation != "default":
 			play_animation("default")
 	
