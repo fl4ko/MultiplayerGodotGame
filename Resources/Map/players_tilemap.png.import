@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x0uf71c1565c"
-path="res://.godot/imported/temp_sprite.png-62aa68b2605fb3fd1c5a0643075bcf46.ctex"
+uid="uid://hj5keiboqaoe"
+path="res://.godot/imported/players_tilemap.png-12def67fce8ea6df04289fb7c2a50b79.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://MultiplayerGodotGame/Resources/Sprites/temp_sprite.png"
-dest_files=["res://.godot/imported/temp_sprite.png-62aa68b2605fb3fd1c5a0643075bcf46.ctex"]
+source_file="res://MultiplayerGodotGame/Resources/Map/players_tilemap.png"
+dest_files=["res://.godot/imported/players_tilemap.png-12def67fce8ea6df04289fb7c2a50b79.ctex"]
 
 [params]
 

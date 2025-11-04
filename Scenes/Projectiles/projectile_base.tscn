@@ -1,21 +1,21 @@
 [gd_scene load_steps=4 format=3 uid="uid://dr0acivk550qm"]
 
-[ext_resource type="Texture2D" uid="uid://bsa83jughmm5" path="res://MultiplayerGodotGame/Resources/Sprites/standart_projectile.png" id="1_cw6nx"]
-[ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/standard_projectile.gd" id="1_wu0is"]
+[ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/projectile_base.gd" id="1_gfq5m"]
+[ext_resource type="Texture2D" uid="uid://bsa83jughmm5" path="res://MultiplayerGodotGame/Resources/Sprites/standart_projectile.png" id="2_2nvf4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_smnrk"]
 size = Vector2(3.24595, 0.25)
 
-[node name="StandardProjectile" type="CharacterBody2D"]
+[node name="ProjectileBase" type="Area2D"]
 position = Vector2(2.38419e-07, 2.38419e-07)
 scale = Vector2(13.7046, 13.7046)
-script = ExtResource("1_wu0is")
+script = ExtResource("1_gfq5m")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 3
 position = Vector2(1.38, 0)
 scale = Vector2(0.125, 0.125)
-texture = ExtResource("1_cw6nx")
+texture = ExtResource("2_2nvf4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(1.384, -0.005)

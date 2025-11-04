@@ -1,26 +1,85 @@
-[gd_scene load_steps=6 format=3 uid="uid://b4a3ath00b0f4"]
+[gd_scene load_steps=12 format=3 uid="uid://b4a3ath00b0f4"]
 
-[ext_resource type="Texture2D" uid="uid://x0uf71c1565c" path="res://MultiplayerGodotGame/Resources/Sprites/temp_sprite.png" id="1_rpmp3"]
 [ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/player.tres.gd" id="1_snot6"]
-[ext_resource type="PackedScene" uid="uid://w81dlxbrp7w8" path="res://MultiplayerGodotGame/Scenes/Guns/rifle.tscn" id="2_c3jo2"]
+[ext_resource type="PackedScene" uid="uid://81seqsor1khd" path="res://MultiplayerGodotGame/Scenes/Guns/bighandgun.tscn" id="2_h3krl"]
+[ext_resource type="Texture2D" uid="uid://hj5keiboqaoe" path="res://MultiplayerGodotGame/Resources/Map/players_tilemap.png" id="3_hmb50"]
 [ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="3_vf3v6"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0aun1"]
-radius = 8.0
-height = 32.0
+[sub_resource type="AtlasTexture" id="AtlasTexture_ry1jd"]
+atlas = ExtResource("3_hmb50")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hs3u8"]
+atlas = ExtResource("3_hmb50")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vto8l"]
+atlas = ExtResource("3_hmb50")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y2hqo"]
+atlas = ExtResource("3_hmb50")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7htlu"]
+atlas = ExtResource("3_hmb50")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0uh74"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ry1jd")
+}],
+"loop": true,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hs3u8")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vto8l")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y2hqo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7htlu")
+}],
+"loop": true,
+"name": &"run",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5q1qd"]
+size = Vector2(21.1111, 18.5185)
 
 [node name="Player" type="CharacterBody2D"]
+position = Vector2(0, -2)
 scale = Vector2(2.7, 2.7)
 script = ExtResource("1_snot6")
-starting_gun = ExtResource("2_c3jo2")
+starting_gun = ExtResource("2_h3krl")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture_filter = 3
-scale = Vector2(1.54239, 1.54239)
-texture = ExtResource("1_rpmp3")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_0uh74")
+animation = &"jump"
 
 [node name="CollisionBox" type="CollisionShape2D" parent="."]
-position = Vector2(0, -2)
-shape = SubResource("CapsuleShape2D_0aun1")
+position = Vector2(0.555555, 2.96296)
+shape = SubResource("RectangleShape2D_5q1qd")
 
 [node name="Gun" parent="." instance=ExtResource("3_vf3v6")]
+position = Vector2(4.81481, 6.2963)

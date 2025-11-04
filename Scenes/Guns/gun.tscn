@@ -1,16 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://b8t8cbn1edonc"]
+[gd_scene load_steps=4 format=3 uid="uid://b8t8cbn1edonc"]
 
 [ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/gun.gd" id="1_fw6gs"]
-[ext_resource type="Texture2D" uid="uid://bbls7kquxww0t" path="res://MultiplayerGodotGame/Resources/Sprites/handgun.png" id="1_i7ben"]
+[ext_resource type="Texture2D" uid="uid://6jjt6288dwhi" path="res://MultiplayerGodotGame/Resources/Sprites/big_handgun.png" id="2_ocory"]
+[ext_resource type="PackedScene" uid="uid://dr0acivk550qm" path="res://MultiplayerGodotGame/Scenes/Projectiles/projectile_base.tscn" id="3_0l2sm"]
 
 [node name="Gun" type="Node2D"]
 script = ExtResource("1_fw6gs")
+gun_texture = ExtResource("2_ocory")
+projectile_scene = ExtResource("3_0l2sm")
+fire_rate = 0.5
+fire_range = 400.0
+projectile_gravity = 150.0
 
 [node name="GunSprite" type="Sprite2D" parent="."]
-texture_filter = 3
-position = Vector2(9.83, -2.38419e-07)
-scale = Vector2(0.94, 0.94)
-texture = ExtResource("1_i7ben")
+texture_filter = 1
+position = Vector2(10, 1)
+texture = ExtResource("2_ocory")
 
 [node name="ProjectileSpawn" type="Node2D" parent="."]
-position = Vector2(19.6296, -4.44444)
+position = Vector2(16, 0)

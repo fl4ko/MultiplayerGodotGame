@@ -14,8 +14,6 @@ size = Vector2(384, 48)
 texture = ExtResource("3_87bry")
 2:5/size_in_atlas = Vector2i(3, 3)
 2:5/0 = 0
-6:1/size_in_atlas = Vector2i(3, 3)
-6:1/0 = 0
 6:5/size_in_atlas = Vector2i(3, 3)
 6:5/0 = 0
 6:9/size_in_atlas = Vector2i(3, 3)
@@ -50,6 +48,8 @@ texture = ExtResource("3_87bry")
 2:9/0 = 0
 2:1/size_in_atlas = Vector2i(3, 3)
 2:1/0 = 0
+6:1/size_in_atlas = Vector2i(3, 3)
+6:1/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_howgi"]
 sources/1 = SubResource("TileSetAtlasSource_gmke3")
@@ -66,9 +66,6 @@ texture = ExtResource("1_ww5kg")
 
 [node name="Player" parent="." instance=ExtResource("1_bwyvq")]
 position = Vector2(311, 383)
-
-[node name="Player2" parent="." instance=ExtResource("1_bwyvq")]
-position = Vector2(570, 378)
 
 [node name="Floor" type="StaticBody2D" parent="."]
 position = Vector2(166, 176)

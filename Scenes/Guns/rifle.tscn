@@ -1,17 +1,18 @@
 [gd_scene load_steps=3 format=3 uid="uid://w81dlxbrp7w8"]
 
 [ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_pd1tk"]
-[ext_resource type="Texture2D" uid="uid://bt8itm4oeh1jv" path="res://MultiplayerGodotGame/Resources/Sprites/rifle.png" id="2_g13qk"]
+[ext_resource type="Texture2D" uid="uid://ble32hgwhi4e7" path="res://MultiplayerGodotGame/Resources/Sprites/rifle.png" id="2_g13qk"]
 
-[node name="Gun" instance=ExtResource("1_pd1tk")]
+[node name="Rifle" instance=ExtResource("1_pd1tk")]
 gun_name = "Rifle"
 gun_texture = ExtResource("2_g13qk")
-projectile_type = "standard"
+fire_mode = "full_auto"
+fire_rate = 0.1
+fire_range = 800.0
 
 [node name="GunSprite" parent="." index="0"]
-position = Vector2(12, -1.13687e-13)
-scale = Vector2(0.0437432, 0.0437432)
+position = Vector2(8, 0)
 texture = ExtResource("2_g13qk")
 
 [node name="ProjectileSpawn" parent="." index="1"]
-position = Vector2(38, -4)
+position = Vector2(17, -2)
