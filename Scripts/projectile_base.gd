@@ -51,9 +51,9 @@ func _physics_process(delta: float) -> void:
 
 func _on_hit(result: Dictionary) -> void:
 	var collider = result.get("collider")
-	if collider and collider.is_in_group("player"):
+	if collider and collider.is_in_group("Player"):
 		if collider.has_method("handle_being_hit"):
-			collider.handle_being_hit()
+			collider.handle_being_hit(direction)
 	queue_free()
 
 # helper to initialize projectile from a gun

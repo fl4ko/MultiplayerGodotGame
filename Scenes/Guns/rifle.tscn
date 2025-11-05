@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://w81dlxbrp7w8"]
+[gd_scene load_steps=4 format=3 uid="uid://w81dlxbrp7w8"]
 
 [ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_pd1tk"]
 [ext_resource type="Texture2D" uid="uid://ble32hgwhi4e7" path="res://MultiplayerGodotGame/Resources/Sprites/rifle.png" id="2_g13qk"]
+[ext_resource type="AudioStream" uid="uid://blycjutf2vah5" path="res://MultiplayerGodotGame/Resources/Sounds/rifle_shoot.ogg" id="3_rdtfm"]
 
 [node name="Rifle" instance=ExtResource("1_pd1tk")]
 gun_name = "Rifle"
@@ -11,8 +12,11 @@ fire_rate = 0.1
 fire_range = 800.0
 
 [node name="GunSprite" parent="." index="0"]
-position = Vector2(8, 0)
+position = Vector2(4, 0)
 texture = ExtResource("2_g13qk")
 
 [node name="ProjectileSpawn" parent="." index="1"]
 position = Vector2(17, -2)
+
+[node name="ShotSoundPlayer" parent="." index="2"]
+stream = ExtResource("3_rdtfm")

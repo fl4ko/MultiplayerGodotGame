@@ -1,5 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://81seqsor1khd"]
+[gd_scene load_steps=3 format=3 uid="uid://81seqsor1khd"]
 
 [ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_3p3k1"]
+[ext_resource type="AudioStream" uid="uid://cgpyvb1k144n3" path="res://MultiplayerGodotGame/Resources/Sounds/bighandgun_shoot.ogg" id="2_0sbfr"]
 
 [node name="BigHandgun" instance=ExtResource("1_3p3k1")]
+
+[node name="ShotSoundPlayer" parent="." index="2"]
+stream = ExtResource("2_0sbfr")

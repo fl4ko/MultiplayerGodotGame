@@ -19,3 +19,5 @@ texture = ExtResource("2_ocory")
 
 [node name="ProjectileSpawn" type="Node2D" parent="."]
 position = Vector2(16, 0)
+
+[node name="ShotSoundPlayer" type="AudioStreamPlayer2D" parent="."]

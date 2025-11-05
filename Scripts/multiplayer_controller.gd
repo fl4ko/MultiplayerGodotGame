@@ -17,6 +17,10 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connected_fail)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
+	if "--server" in OS.get_cmdline_args():
+		host_game()
+		
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
@@ -27,11 +31,15 @@ func _on_player_connected(id):
 
 func _on_player_disconnected(id):
 	print("Player disconnected " + str(id))
+	GameManager.connected_players.erase(id)
+	var all_players = get_tree().get_nodes_in_group("Player")
+	for player in all_players:
+		if player.name == str(id):
+			player.queue_free()
 
 # Clinet only
 func _on_connected_ok():
 	print("Connected to server successfully")
-
 	send_player_info.rpc_id(1, multiplayer.get_unique_id(), $NameBox.text)
 
 func _on_connected_fail():
@@ -43,18 +51,8 @@ func _on_server_disconnected():
 # Button handlers
 
 func _on_host_button_down():
-	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_server(PORT, MAX_CONNECTIONS)
-
-	if error:
-		return error
-
-	multiplayer.multiplayer_peer = peer
-
+	host_game()
 	send_player_info(multiplayer.get_unique_id(), $NameBox.text)
-
-	print("Server hosted")
-	pass
 
 func _on_join_button_down(address = ""):	
 	if address.is_empty():
@@ -73,10 +71,24 @@ func _on_start_button_down():
 	pass
 
 @rpc("any_peer", "call_local")
-func start_game(game_scene_file_path = ""):
+func start_game(game_scene_file_path: String = "") -> void:
 	if game_scene_file_path.is_empty():
 		game_scene_file_path = DEFAULT_SCENE_FILE_PATH
+
 	get_tree().change_scene_to_file(game_scene_file_path)
+
+
+func host_game():
+	var peer = ENetMultiplayerPeer.new()
+	var error = peer.create_server(PORT, MAX_CONNECTIONS)
+
+	if error:
+		return error
+
+	multiplayer.multiplayer_peer = peer
+
+	print("Server hosted")
+	pass
 
 @rpc("any_peer")
 func send_player_info(id, player_name):
