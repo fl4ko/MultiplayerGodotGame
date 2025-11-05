@@ -97,6 +97,9 @@ properties/8/replication_mode = 1
 properties/9/path = NodePath("AnimatedSprite2D:frame")
 properties/9/spawn = true
 properties/9/replication_mode = 1
+properties/10/path = NodePath("AnimatedSprite2D:flip_h")
+properties/10/spawn = true
+properties/10/replication_mode = 1
 
 [node name="Player" type="CharacterBody2D"]
 position = Vector2(0, -2)
