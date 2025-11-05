@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvg4jkjy47lnw"]
+
+[ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/multiplayer_controller.gd" id="1_a0orb"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a0orb")
+
+[node name="HostButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 193.0
+offset_top = 128.0
+offset_right = 641.0
+offset_bottom = 256.0
+text = "Host"
+
+[node name="StartButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 128.0
+offset_right = 1728.0
+offset_bottom = 256.0
+text = "Start"
+
+[node name="JoinButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 736.0
+offset_top = 128.0
+offset_right = 1184.0
+offset_bottom = 256.0
+text = "Join"
+
+[node name="NameBox" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 192.0
+offset_top = 48.0
+offset_right = 704.0
+offset_bottom = 80.0
+
+[connection signal="button_down" from="HostButton" to="." method="_on_host_button_down"]
+[connection signal="button_down" from="StartButton" to="." method="_on_start_button_down"]
+[connection signal="button_down" from="JoinButton" to="." method="_on_join_button_down"]

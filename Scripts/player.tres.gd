@@ -21,6 +21,8 @@ var facing_right:bool = true
 var is_holding_gun: bool = false
 
 func _ready() -> void:
+	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
+
 	add_to_group("player")
 	if starting_gun:
 		equip_starting_gun()
@@ -41,51 +43,53 @@ func equip_starting_gun():
 	is_holding_gun = true
 
 func _physics_process(delta: float) -> void:
-	# Add the gravity.
-	if not is_on_floor():
-		velocity += get_gravity() * delta
+	if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
 
-	# Handle jump.
-	if Input.is_action_just_pressed("Jump") and is_on_floor():
-		velocity.y = jump_height
-		play_animation("jump")
+		# Add the gravity.
+		if not is_on_floor():
+			velocity += get_gravity() * delta
 
-	if Input.is_action_just_released("Jump") and velocity.y < 0:
-		velocity.y *= jump_timing
+		# Handle jump.
+		if Input.is_action_just_pressed("Jump") and is_on_floor():
+			velocity.y = jump_height
+			play_animation("jump")
 
-	# Handle shooting
-	if Input.is_action_just_pressed("Shoot") and is_holding_gun:
-		current_gun.start_firing()
+		if Input.is_action_just_released("Jump") and velocity.y < 0:
+			velocity.y *= jump_timing
 
-	if Input.is_action_just_released("Shoot") and is_holding_gun:
-		current_gun.stop_firing()
-	
-	if Input.is_action_just_pressed("Drop_Gun") and is_holding_gun:
-		drop_gun()
+		# Handle shooting
+		if Input.is_action_just_pressed("Shoot") and is_holding_gun:
+			current_gun.start_firing()
 
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction := Input.get_axis("ui_left", "ui_right")
-	if direction:
-		velocity.x = move_toward(velocity.x, direction * speed, speed * acceleration)
+		if Input.is_action_just_released("Shoot") and is_holding_gun:
+			current_gun.stop_firing()
 		
-		if direction > 0 and not facing_right:
-			flip_sprite(true)
-		elif direction < 0 and facing_right:
-			flip_sprite(false)
+		if Input.is_action_just_pressed("Drop_Gun") and is_holding_gun:
+			drop_gun()
 
-		if is_on_floor() and anim.animation != "run":
-			play_animation("run")
-	else:
-		velocity.x = move_toward(velocity.x, 0, speed * deceleration)
-		if is_on_floor() and anim.animation != "default":
-			play_animation("default")
-	
-	# If jumping/falling
-	if not is_on_floor() and velocity.y < 0:
-		play_animation("jump")
+		# Get the input direction and handle the movement/deceleration.
+		# As good practice, you should replace UI actions with custom gameplay actions.
+		var direction := Input.get_axis("ui_left", "ui_right")
+		if direction:
+			velocity.x = move_toward(velocity.x, direction * speed, speed * acceleration)
+			
+			if direction > 0 and not facing_right:
+				flip_sprite(true)
+			elif direction < 0 and facing_right:
+				flip_sprite(false)
 
-	move_and_slide()
+			if is_on_floor() and anim.animation != "run":
+				play_animation("run")
+		else:
+			velocity.x = move_toward(velocity.x, 0, speed * deceleration)
+			if is_on_floor() and anim.animation != "default":
+				play_animation("default")
+		
+		# If jumping/falling
+		if not is_on_floor() and velocity.y < 0:
+			play_animation("jump")
+
+		move_and_slide()
 
 func play_animation(anim_name: String):
 	if anim.animation != anim_name:
