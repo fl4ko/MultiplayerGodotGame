@@ -15,6 +15,9 @@ extends CharacterBody2D
 @export var jump_height: float = -700.0
 @export_range(0, 1) var jump_timing: float = 0.5
 
+# How close the player must be to pick up a dropped weapon
+@export var pickup_range: float = 48.0
+
 var current_gun: Node = null
 
 var facing_right:bool = true
@@ -64,9 +67,11 @@ func _physics_process(delta: float) -> void:
 
 			if Input.is_action_just_released("Shoot") and is_holding_gun:
 				rpc_stop_fire.rpc()
-			
-			if Input.is_action_just_pressed("Drop_Gun") and is_holding_gun:
-				drop_gun()
+
+			# Throw or pick up weapon
+			if Input.is_action_just_pressed("Throw_Or_Pick_Up_Weapon"):
+				_try_throw_or_pickup()
+
 
 			# Get the input direction and handle the movement/deceleration.
 			# As good practice, you should replace UI actions with custom gameplay actions.
@@ -109,6 +114,65 @@ func flip_sprite(face_right: bool):
 		gun.scale.x *= -1
 		gun.position.x *= -1
 
+
+func _try_throw_or_pickup() -> void:
+	if is_holding_gun and current_gun:
+		var dir := 1 if facing_right else -1
+		rpc_throw_weapon.rpc(dir)
+	else:
+		var weapon := find_nearest_dropped_weapon()
+		if weapon:
+			rpc_pickup_weapon.rpc(weapon.get_path())
+
+
+@rpc("any_peer", "call_local")
+func rpc_throw_weapon(direction: int) -> void:
+	if current_gun:
+		current_gun.throw_from_player(direction)
+		current_gun = null
+		is_holding_gun = false
+
+
+@rpc("any_peer", "call_local")
+func rpc_pickup_weapon(weapon_path: NodePath) -> void:
+	var weapon = get_node_or_null(weapon_path)
+	if weapon:
+		weapon.pick_up(self)
+		current_gun = weapon
+		is_holding_gun = true
+		# update references
+		if current_gun.has_node("GunSprite"):
+			gun_sprite = current_gun.get_node("GunSprite")
+		if current_gun.has_node("ProjectileSpawn"):
+			projectile_spawn = current_gun.get_node("ProjectileSpawn")
+
+
+func find_nearest_dropped_weapon() -> Node:
+	var closest: Node = null
+	var best_dist := 1e9
+	for w in get_tree().get_nodes_in_group("DroppedWeapon"):
+		if not w or not (w is Node2D):
+			continue
+		if not w.has_method("pick_up"):
+			continue
+		var d := global_position.distance_to(w.global_position)
+		if d < best_dist:
+			best_dist = d
+			closest = w
+	if best_dist <= pickup_range:
+		return closest
+	return null
+
+
+func _on_gun_picked_up(gun_node: Node) -> void:
+	# Called from a gun instance when it attaches to this player
+	current_gun = gun_node
+	is_holding_gun = true
+	if current_gun.has_node("GunSprite"):
+		gun_sprite = current_gun.get_node("GunSprite")
+	if current_gun.has_node("ProjectileSpawn"):
+		projectile_spawn = current_gun.get_node("ProjectileSpawn")
+
 @rpc("any_peer", "call_local")
 func rpc_fire():
 	current_gun.start_firing()
@@ -118,8 +182,10 @@ func rpc_stop_fire():
 	current_gun.stop_firing()
 
 func drop_gun():
-	if is_holding_gun:
-		gun.free()
+	if is_holding_gun and current_gun:
+		var dir := 1 if facing_right else -1
+		current_gun.throw_from_player(dir)
+		current_gun = null
 		is_holding_gun = false
 
 @rpc("any_peer", "call_local")

@@ -40,7 +40,7 @@ func _on_player_disconnected(id):
 # Clinet only
 func _on_connected_ok():
 	print("Connected to server successfully")
-	send_player_info.rpc_id(1, multiplayer.get_unique_id(), $NameBox.text)
+	send_player_info.rpc_id(1, multiplayer.get_unique_id(), $ButtonsMapLayer/NameBox.text)
 
 func _on_connected_fail():
 	print("Failed to connect to server")
@@ -52,7 +52,7 @@ func _on_server_disconnected():
 
 func _on_host_button_down():
 	host_game()
-	send_player_info(multiplayer.get_unique_id(), $NameBox.text)
+	send_player_info(multiplayer.get_unique_id(), $ButtonsMapLayer/NameBox.text)
 
 func _on_join_button_down(address = ""):	
 	if address.is_empty():
