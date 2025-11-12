@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=4 uid="uid://1febpcledotx"]
+[gd_scene load_steps=28 format=4 uid="uid://1febpcledotx"]
 
 [ext_resource type="PackedScene" uid="uid://b4a3ath00b0f4" path="res://MultiplayerGodotGame/Scenes/player.tscn" id="1_bwyvq"]
 [ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/scene_manager.gd" id="1_g25or"]
@@ -280,6 +280,9 @@ texture = ExtResource("3_lutuo")
 [sub_resource type="TileSet" id="TileSet_43jo8"]
 sources/4 = SubResource("TileSetAtlasSource_ommey")
 
+[sub_resource type="LabelSettings" id="LabelSettings_jripc"]
+font_size = 81
+
 [sub_resource type="LabelSettings" id="LabelSettings_qn5h3"]
 font_size = 20
 
@@ -291,6 +294,9 @@ font_size = 20
 
 [sub_resource type="LabelSettings" id="LabelSettings_25tok"]
 font_size = 20
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l2goh"]
+size = Vector2(185, 20)
 
 [node name="TestScene" type="Node2D"]
 script = ExtResource("1_g25or")
@@ -423,6 +429,17 @@ scale = Vector2(2.4, 2.4)
 position = Vector2(740, 387)
 scale = Vector2(2.5, 2.5)
 
+[node name="WinnerLabel" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 207.0
+offset_top = 39.0
+offset_right = 868.0
+offset_bottom = 150.0
+grow_horizontal = 2
+label_settings = SubResource("LabelSettings_jripc")
+
 [node name="Scoreboard" type="VBoxContainer" parent="."]
 anchors_preset = 8
 anchor_left = 0.5
@@ -486,3 +503,11 @@ label_settings = SubResource("LabelSettings_25tok")
 [node name="PlayerScore" type="Label" parent="Scoreboard/Player4"]
 layout_mode = 2
 text = "0"
+
+[node name="DeathBox" type="Area2D" parent="."]
+position = Vector2(870, 1150)
+scale = Vector2(30.3099, -1.00641)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathBox"]
+scale = Vector2(1, 1)
+shape = SubResource("RectangleShape2D_l2goh")

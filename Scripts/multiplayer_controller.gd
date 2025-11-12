@@ -26,6 +26,12 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.register_controller(self)
 		
+	# Mark as a lobby controller so GameManager can refresh UI on return-to-lobby
+	add_to_group("LobbyController")
+
+	# Populate lobby labels immediately on scene load using current GameManager state
+	_update_lobby_labels()
+		
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -81,6 +87,10 @@ func _on_start_button_down():
 	emit_signal("start_pressed")
 	pass
 
+func refresh_lobby_from_gamemanager() -> void:
+	# Public hook for GameManager to force a lobby UI refresh after scene changes
+	_update_lobby_labels()
+
 @rpc("any_peer", "call_local")
 func start_game(_game_scene_file_path: String = "") -> void:
 	# Instead of directly changing scenes on every peer, request the server to start the match.
@@ -116,8 +126,6 @@ func send_player_info(id, player_name):
 	if multiplayer.is_server():
 		for i in GameManager.connected_players:
 			send_player_info.rpc(i, GameManager.connected_players[i].player_name)
-		# Also push a scoreboard update so all peers see names as they join
-		GameManager.rpc_update_scoreboard()
 
 	# Refresh the lobby UI when player list changes
 	_update_lobby_labels()

@@ -14,13 +14,11 @@ var round_active: bool = false
 var current_round: int = 0
 var player_states: Dictionary = {}
 
-# Cache last scoreboard so freshly loaded round scenes can immediately display it
-var _last_scoreboard: Dictionary = {}
-var _last_round_num: int = 0
-
 # Internal state
 var _match_active: bool = false
 var _last_started_round: int = -1
+var _last_scoreboard: Dictionary = {}
+var _last_round_num: int = 0
 
 func _ready() -> void:
 	# GameManager no longer auto-starts a match on server startup.
@@ -223,6 +221,9 @@ func _end_match(winner_id: int) -> void:
 	# Ensure clients have the final scoreboard
 	rpc_update_scoreboard()
 
+	# Show the winner label in the current round scene for a moment before returning to lobby
+	rpc("rpc_show_winner_label", winner_id)
+
 	# Small delay so players can see final scores/animations before being returned to the lobby
 	var end_delay: float = 3.0
 	print("GameManager: waiting", end_delay, "seconds before returning to lobby")
@@ -235,25 +236,45 @@ func _end_match(winner_id: int) -> void:
 	_match_active = false
 
 
+@rpc("any_peer", "call_local")
+func rpc_show_winner_label(winner_id: int) -> void:
+	# Try to find a Label named "WinnerLabel" in the current scene and display the winner
+	var scene := get_tree().get_current_scene()
+	if not scene:
+		return
+	var label := scene.get_node_or_null("WinnerLabel")
+	if not label:
+		return
+
+	var text := ""
+	if winner_id >= 0:
+		var display := str(winner_id)
+		if connected_players.has(winner_id):
+			var info = connected_players[winner_id]
+			if typeof(info) == TYPE_DICTIONARY and info.has("player_name"):
+				var nm := str(info["player_name"]).strip_edges()
+				if nm != "":
+					display = nm
+		text = display
+	else:
+		text = "Brak zwycięzcy"
+
+	if label.has_method("set_text"):
+		label.set_text("Winner: " + text)
+	else:
+		label.text = "Winner: " + text
+	if label.has_method("set_visible"):
+		label.set_visible(true)
+	else:
+		label.visible = true
+
+
 func rpc_update_scoreboard() -> void:
-	# Broadcast scoreboard to clients.
-	# Build a structured payload per player id: { "score": X, "player_name": Y }
+	# Broadcast scoreboard to clients
+	# Convert keys to ints/strings for safe RPC transfer
 	var board := {}
-	for id in connected_players:
-		var score_val := 0
-		if scores.has(id):
-			score_val = int(scores[id])
-		var pname := "Player " + str(id)
-		var pdata = connected_players[id]
-		if typeof(pdata) == TYPE_DICTIONARY and pdata.has("player_name"):
-			var raw_name = str(pdata["player_name"]).strip_edges()
-			if raw_name != "":
-				pname = raw_name
-		board[str(id)] = {"score": score_val, "player_name": pname}
-
-	_last_scoreboard = board
-	_last_round_num = current_round
-
+	for id in scores:
+		board[str(id)] = scores[id]
 	# send via RPC to all peers
 	rpc("rpc_receive_scoreboard", board, current_round)
 
@@ -262,20 +283,29 @@ func rpc_receive_scoreboard(board: Dictionary, round_num: int) -> void:
 	# Clients receive and may display scoreboard.
 	print("Scoreboard update (round", round_num, "):")
 	for k in board:
-		var entry = board[k]
-		if typeof(entry) == TYPE_DICTIONARY:
-			print("  ", entry.get("player_name", k), " -> ", entry.get("score", 0))
-		else:
-			print("  player", k, ":", entry)
+		print("  player", k, ":", board[k])
 
-	# Cache locally (client side) too so late-loaded scenes can pull it
-	_last_scoreboard = board
+	# Cache latest scoreboard so newly loaded scenes can request it
+	_last_scoreboard = board.duplicate(true)
 	_last_round_num = round_num
 
 	# Forward the scoreboard to the current scene if it implements `update_scoreboard`.
 	var current_scene = get_tree().get_current_scene()
 	if current_scene and current_scene.has_method("update_scoreboard"):
+		# Call without waiting; UI update should be immediate on client.
 		current_scene.call("update_scoreboard", board, round_num)
+
+	# Defer a push to the next frame in case a scene change is in progress
+	call_deferred("push_cached_scoreboard_to_scene")
+
+
+func push_cached_scoreboard_to_scene() -> void:
+	# Push cached scoreboard to current scene (used after scene changes or on demand)
+	if _last_scoreboard.size() == 0:
+		return
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("update_scoreboard"):
+		scene.call("update_scoreboard", _last_scoreboard, _last_round_num)
 
 @rpc("any_peer", "call_local")
 func rpc_end_match(winner_id: int) -> void:
@@ -283,6 +313,13 @@ func rpc_end_match(winner_id: int) -> void:
 	# Optionally perform local cleanup here
 	# Return to control scene for all peers
 	get_tree().change_scene_to_file(control_scene_path)
+	# After scene load, refresh lobby UI labels
+	call_deferred("_notify_lobby_ui_refresh")
+
+
+func _notify_lobby_ui_refresh() -> void:
+	# Ask any lobby controllers to refresh their player list labels
+	get_tree().call_group("LobbyController", "refresh_lobby_from_gamemanager")
 
 
 @rpc("any_peer")

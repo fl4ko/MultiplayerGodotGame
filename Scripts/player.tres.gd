@@ -26,6 +26,7 @@ var facing_right:bool = true
 var is_holding_gun: bool = false
 var is_dead: bool = false
 
+
 # Local HUD for ammo (created only for the local player)
 var ui_canvas: CanvasLayer = null
 var ammo_bar: ProgressBar = null
@@ -176,9 +177,10 @@ func _attach_ammo_bar_to_gun(gun_node: Node) -> void:
 		ammo_signal_source = gun_node
 
 
-func _on_gun_ammo_changed(current: int, max: int) -> void:
+
+func _on_gun_ammo_changed(current: int, max_val: int) -> void:
 	if ammo_bar:
-		ammo_bar.max_value = max
+		ammo_bar.max_value = max_val
 		ammo_bar.value = current
 
 
@@ -296,19 +298,20 @@ func play_death_sound():
 	$DeathSoundPlayer.play()
 
 func handle_being_hit(hit_direction: int):
-	is_dead = true
-	play_animation("dead")
+	if not is_dead:
+		is_dead = true
+		play_animation("dead")
 
-	var end_pos := global_position + Vector2(50 * hit_direction, -30)
-	var tween := create_tween()
-	tween.tween_property(self, "global_position", end_pos, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "global_position", global_position + Vector2(80 * hit_direction, 0), 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	
-	await tween.finished
+		var end_pos := global_position + Vector2(50 * hit_direction, -30)
+		var tween := create_tween()
+		tween.tween_property(self, "global_position", end_pos, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "global_position", global_position + Vector2(80 * hit_direction, 0), 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		
+		await tween.finished
 
-	# Disable player input and stop processing further player control
-	set_physics_process(false)
-	handle_death()
+		# Disable player input and stop processing further player control
+		set_physics_process(false)
+		handle_death()
 
 func handle_death():
 	play_death_sound.rpc()
