@@ -1,6 +1,8 @@
 extends Node2D
 class_name GunItem
 
+signal ammo_changed(current: int, max: int)
+
 @export var gun_name: String = "BigHandgun"
 @export var gun_texture: Texture2D
 @export var projectile_scene: PackedScene
@@ -10,9 +12,14 @@ class_name GunItem
 @export var bullet_speed: float = 800.0
 @export var projectile_gravity: float = 0.0
 
+# Shot modifiers
+@export var projectiles_per_shot: int = 1
+@export var spread_degrees: float = 0.0
+
 # Ammo / pickup / throw properties
 @export var has_infinite_ammo: bool = false
 @export var ammo: int = 0 # remaining ammo (ignored when has_infinite_ammo is true)
+@export var max_ammo: int = 0
 
 # Thrown weapon simulation
 @export var throw_strength: float = 800.0
@@ -38,6 +45,26 @@ func _ready() -> void:
 			push_warning("Gun has no gun_texture assigned!")
 	# Always mark as a weapon. When thrown, we'll add it to the "DroppedWeapon" group.
 	add_to_group("Weapon")
+
+	# If max_ammo wasn't set in the inspector, use initial ammo as max
+	if max_ammo <= 0:
+		max_ammo = ammo
+
+	# Notify listeners about initial ammo state
+	emit_signal("ammo_changed", ammo, max_ammo)
+
+	# If this gun is placed in the world (not parented to a Player), make it pickable
+	if not _is_parented_to_player():
+		pickup_enabled = true
+		# ensure it's discoverable by players scanning for dropped weapons
+		if not is_in_group("DroppedWeapon"):
+			add_to_group("DroppedWeapon")
+		# disable firing while world-placed (until picked up)
+		can_fire = false
+	else:
+		# If it's inside a player already, ensure it's not in dropped group
+		if is_in_group("DroppedWeapon"):
+			remove_from_group("DroppedWeapon")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -107,17 +134,48 @@ func fire_projectile() -> void:
 	if not can_fire or not projectile_scene:
 		return
 
+	# Block firing if out of ammo (for limited weapons)
+	if not has_infinite_ammo and ammo <= 0:
+		# Optionally play an empty-click sound here
+		return
+
 	can_fire = false
 
-	var projectile = projectile_scene.instantiate()
-	projectile.direction = sign(global_transform.basis_xform(Vector2.RIGHT).x)
-	projectile.position = $ProjectileSpawn.global_position
-	projectile.bullet_speed = bullet_speed
-	projectile.bullet_range = fire_range
-	projectile.projectile_gravity = projectile_gravity
+	var base_dir: int = int(sign(global_transform.basis_xform(Vector2.RIGHT).x))
 
-	get_tree().current_scene.add_child(projectile)
+	# Spawn multiple projectiles per shot (shotgun-style) with spread
+	for i in range(projectiles_per_shot):
+		var proj: Node = projectile_scene.instantiate()
+		# compute angle in degrees: 0 = right, 180 = left
+		var base_angle_deg: float = 0.0 if base_dir > 0 else 180.0
+		var offset: float = 0.0
+		if spread_degrees != 0.0:
+			offset = randf_range(-spread_degrees * 0.5, spread_degrees * 0.5)
+		var angle_deg: float = base_angle_deg + offset
+
+		proj.position = $ProjectileSpawn.global_position
+		# initialize projectile properly (uses angle to set velocity)
+		if proj.has_method("setup_from_gun"):
+			proj.setup_from_gun(bullet_speed, base_dir, fire_range, projectile_gravity, 1, 0.0, angle_deg)
+		else:
+			# fallback for older projectile implementations
+			proj.direction = base_dir
+			proj.bullet_speed = bullet_speed
+			proj.bullet_range = fire_range
+			proj.projectile_gravity = projectile_gravity
+
+		get_tree().current_scene.add_child(proj)
+	# play sound once per shot
 	play_fire_sound.rpc()
+
+
+	# Deplete ammo for limited weapons
+	if not has_infinite_ammo:
+		ammo = max(ammo - 1, 0)
+		emit_signal("ammo_changed", ammo, max_ammo)
+		if ammo <= 0:
+			# disable further firing until picked up/rewritten
+			can_fire = false
 
 	await get_tree().create_timer(fire_rate).timeout
 	can_fire = true
@@ -209,3 +267,12 @@ func pick_up(by_player: Node) -> void:
 		# set player's variables so they know they hold this
 		if by_player.has_method("_on_gun_picked_up"):
 			by_player._on_gun_picked_up(self)
+
+
+func _is_parented_to_player() -> bool:
+	var node := get_parent()
+	while node:
+		if node.is_in_group("Player"):
+			return true
+		node = node.get_parent()
+	return false

@@ -16,7 +16,9 @@ var prev_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	velocity = Vector2(bullet_speed * direction, 0)
+	# Only set the default velocity if it wasn't initialized by setup_from_gun
+	if velocity == Vector2.ZERO:
+		velocity = Vector2(bullet_speed * direction, 0)
 	prev_position = global_position
 	monitoring = true
 
@@ -63,7 +65,8 @@ func setup_from_gun(
 	p_range: float,
 	p_gravity: float,
 	p_damage: int = 1,
-	p_drop_start: float = 0.0
+	p_drop_start: float = 0.0,
+	p_angle_deg: float = 0.0
 ) -> void:
 	bullet_speed = p_speed
 	direction = p_dir
@@ -71,4 +74,10 @@ func setup_from_gun(
 	projectile_gravity = p_gravity
 	damage = p_damage
 	drop_start_distance = p_drop_start
-	velocity = Vector2(bullet_speed * direction, 0)
+
+	# If an angle is provided (degrees), compute the velocity vector accordingly.
+	var angle_rad: float = deg_to_rad(p_angle_deg)
+	velocity = Vector2(cos(angle_rad), sin(angle_rad)) * bullet_speed
+	# fallback: ensure direction matches horizontal sign
+	if velocity.x != 0:
+		direction = int(sign(velocity.x))

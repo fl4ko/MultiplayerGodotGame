@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://bgp77ksi281ss"]
+
+[ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_k74pu"]
+[ext_resource type="Texture2D" uid="uid://tjjpylhpn36h" path="res://MultiplayerGodotGame/Resources/Sprites/shotgun.png" id="2_vmw6l"]
+[ext_resource type="AudioStream" uid="uid://d3vrm00oh6dbq" path="res://MultiplayerGodotGame/Resources/Sounds/shotgun_shot.ogg" id="3_6wi1m"]
+
+[node name="Shotgun" instance=ExtResource("1_k74pu")]
+gun_name = "Shotgun"
+gun_texture = ExtResource("2_vmw6l")
+fire_rate = 0.2
+fire_range = 250.0
+bullet_speed = 600.0
+projectiles_per_shot = 12
+spread_degrees = 20.0
+ammo = 8
+max_ammo = 8
+throw_strength = 600.0
+land_distance_offset = 12.0
+
+[node name="GunSprite" parent="." index="0"]
+texture = ExtResource("2_vmw6l")
+
+[node name="ShotSoundPlayer" parent="." index="2"]
+stream = ExtResource("3_6wi1m")

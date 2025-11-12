@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://b4a3ath00b0f4"]
 
 [ext_resource type="Script" path="res://MultiplayerGodotGame/Scripts/player.tres.gd" id="1_snot6"]
-[ext_resource type="PackedScene" uid="uid://w81dlxbrp7w8" path="res://MultiplayerGodotGame/Scenes/Guns/rifle.tscn" id="2_faqyg"]
+[ext_resource type="PackedScene" uid="uid://b4p8gmiqlqcv3" path="res://MultiplayerGodotGame/Scenes/Guns/small_handgun.tscn" id="2_swjdh"]
 [ext_resource type="Texture2D" uid="uid://hj5keiboqaoe" path="res://MultiplayerGodotGame/Resources/Map/players_tilemap.png" id="3_hmb50"]
 [ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="3_vf3v6"]
 [ext_resource type="AudioStream" uid="uid://c5sd2fgrbj2he" path="res://MultiplayerGodotGame/Resources/Sounds/dead.ogg" id="5_uwkhh"]
@@ -106,7 +106,8 @@ properties/10/replication_mode = 1
 position = Vector2(0, -2)
 scale = Vector2(2.7, 2.7)
 script = ExtResource("1_snot6")
-starting_gun = ExtResource("2_faqyg")
+starting_gun = ExtResource("2_swjdh")
+speed = 280.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 texture_filter = 1

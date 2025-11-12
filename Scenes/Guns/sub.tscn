@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://cykdde62pkirv"]
+
+[ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_kd0xx"]
+[ext_resource type="Texture2D" uid="uid://b4g41iy1in5ym" path="res://MultiplayerGodotGame/Resources/Sprites/sub.png" id="2_dykty"]
+[ext_resource type="AudioStream" uid="uid://bu1mspmx2hkt3" path="res://MultiplayerGodotGame/Resources/Sounds/smallhandgun_shot.ogg" id="3_vjeyl"]
+
+[node name="Sub" instance=ExtResource("1_kd0xx")]
+gun_texture = ExtResource("2_dykty")
+fire_mode = "full_auto"
+fire_rate = 0.05
+fire_range = 350.0
+spread_degrees = 35.0
+ammo = 45
+max_ammo = 45
+land_distance_offset = 12.0
+
+[node name="GunSprite" parent="." index="0"]
+texture = ExtResource("2_dykty")
+
+[node name="ShotSoundPlayer" parent="." index="2"]
+stream = ExtResource("3_vjeyl")

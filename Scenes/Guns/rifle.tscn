@@ -10,6 +10,11 @@ gun_texture = ExtResource("2_g13qk")
 fire_mode = "full_auto"
 fire_rate = 0.1
 fire_range = 800.0
+spread_degrees = 5.0
+ammo = 30
+max_ammo = 30
+throw_strength = 450.0
+land_distance_offset = 14.0
 
 [node name="GunSprite" parent="." index="0"]
 position = Vector2(4, 0)

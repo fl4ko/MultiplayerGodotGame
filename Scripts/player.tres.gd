@@ -24,6 +24,11 @@ var facing_right:bool = true
 var is_holding_gun: bool = false
 var is_dead: bool = false
 
+# Local HUD for ammo (created only for the local player)
+var ui_canvas: CanvasLayer = null
+var ammo_bar: ProgressBar = null
+var ammo_signal_source: Node = null
+
 func _ready() -> void:
 	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	add_to_group("Player")
@@ -45,6 +50,10 @@ func equip_starting_gun():
 
 	current_gun = gun_instance
 	is_holding_gun = true
+
+	# If this is the local player, attach ammo UI
+	if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
+		_attach_ammo_bar_to_gun(current_gun)
 
 func _physics_process(delta: float) -> void:
 	if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
@@ -115,10 +124,81 @@ func flip_sprite(face_right: bool):
 		gun.position.x *= -1
 
 
+### Ammo HUD helpers (local player only)
+func _create_ammo_bar() -> void:
+	if ammo_bar:
+		return
+	ui_canvas = CanvasLayer.new()
+	ui_canvas.name = "LocalUI"
+	ui_canvas.layer = 1
+	add_child(ui_canvas)
+
+	ammo_bar = ProgressBar.new()
+	ammo_bar.name = "AmmoBar"
+	ammo_bar.min_value = 0
+	ammo_bar.max_value = 1
+	ammo_bar.value = 0
+	ammo_bar.position = Vector2(10, 10)
+	ammo_bar.size = Vector2(160, 14)
+	ammo_bar.visible = false
+	ui_canvas.add_child(ammo_bar)
+
+
+func _attach_ammo_bar_to_gun(gun_node: Node) -> void:
+	_create_ammo_bar()
+	if not gun_node:
+		return
+
+	# hide for infinite ammo (safely check type first)
+	if gun_node is GunItem and gun_node.has_infinite_ammo:
+		ammo_bar.visible = false
+		return
+
+	# set max / value from the gun (only if it's a GunItem)
+	if gun_node is GunItem:
+		ammo_bar.max_value = gun_node.max_ammo if gun_node.max_ammo > 0 else max(gun_node.ammo, 1)
+		ammo_bar.value = gun_node.ammo
+	else:
+		ammo_bar.max_value = 1
+		ammo_bar.value = 1
+	ammo_bar.visible = true
+
+	_clear_ammo_signal()
+	if gun_node.has_signal("ammo_changed"):
+		gun_node.connect("ammo_changed", Callable(self, "_on_gun_ammo_changed"))
+		ammo_signal_source = gun_node
+
+
+func _on_gun_ammo_changed(current: int, max: int) -> void:
+	if ammo_bar:
+		ammo_bar.max_value = max
+		ammo_bar.value = current
+
+
+func _clear_ammo_signal() -> void:
+	if ammo_signal_source:
+		if ammo_signal_source.is_connected("ammo_changed", Callable(self, "_on_gun_ammo_changed")):
+			ammo_signal_source.disconnect("ammo_changed", Callable(self, "_on_gun_ammo_changed"))
+		ammo_signal_source = null
+
+
+func clear_ammo_bar() -> void:
+	_clear_ammo_signal()
+	if ammo_bar:
+		ammo_bar.visible = false
+	if ui_canvas:
+		ui_canvas.queue_free()
+		ui_canvas = null
+		ammo_bar = null
+
+
 func _try_throw_or_pickup() -> void:
 	if is_holding_gun and current_gun:
 		var dir := 1 if facing_right else -1
 		rpc_throw_weapon.rpc(dir)
+		# if local, clear the ammo UI immediately (we're about to drop)
+		if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
+			clear_ammo_bar()
 	else:
 		var weapon := find_nearest_dropped_weapon()
 		if weapon:
@@ -145,6 +225,10 @@ func rpc_pickup_weapon(weapon_path: NodePath) -> void:
 			gun_sprite = current_gun.get_node("GunSprite")
 		if current_gun.has_node("ProjectileSpawn"):
 			projectile_spawn = current_gun.get_node("ProjectileSpawn")
+
+		# If this is the local player, attach the ammo UI to new gun
+		if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
+			_attach_ammo_bar_to_gun(current_gun)
 
 
 func find_nearest_dropped_weapon() -> Node:
@@ -173,6 +257,11 @@ func _on_gun_picked_up(gun_node: Node) -> void:
 	if current_gun.has_node("ProjectileSpawn"):
 		projectile_spawn = current_gun.get_node("ProjectileSpawn")
 
+	# If this is the local player, attach ammo UI
+	if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
+		_attach_ammo_bar_to_gun(current_gun)
+
+
 @rpc("any_peer", "call_local")
 func rpc_fire():
 	current_gun.start_firing()
@@ -184,7 +273,10 @@ func rpc_stop_fire():
 func drop_gun():
 	if is_holding_gun and current_gun:
 		var dir := 1 if facing_right else -1
-		current_gun.throw_from_player(dir)
+		# If local, clear ammo UI
+		if $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id():
+			clear_ammo_bar()
+		current_gun.throw_from_player(dir, 5.0)
 		current_gun = null
 		is_holding_gun = false
 
@@ -212,6 +304,6 @@ func handle_being_hit(hit_direction: int):
 	handle_death()
 
 func handle_death():
-	$CollisionBox.free()
 	play_death_sound.rpc()
 	drop_gun()
+	$CollisionBox.disabled = true

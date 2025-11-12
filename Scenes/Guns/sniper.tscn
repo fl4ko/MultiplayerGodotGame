@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://do2tedued28mb"]
+
+[ext_resource type="PackedScene" uid="uid://b8t8cbn1edonc" path="res://MultiplayerGodotGame/Scenes/Guns/gun.tscn" id="1_n3p1p"]
+[ext_resource type="Texture2D" uid="uid://ds284qrlkeqa0" path="res://MultiplayerGodotGame/Resources/Sprites/sniper.png" id="2_i61kh"]
+[ext_resource type="AudioStream" uid="uid://dmpphavnn62fb" path="res://MultiplayerGodotGame/Resources/Sounds/sniper_shot.ogg" id="3_sjegg"]
+
+[node name="Sniper" instance=ExtResource("1_n3p1p")]
+gun_name = "Sniper"
+gun_texture = ExtResource("2_i61kh")
+fire_rate = 0.9
+fire_range = 1800.0
+bullet_speed = 3000.0
+ammo = 5
+max_ammo = 5
+land_distance_offset = 12.0
+
+[node name="GunSprite" parent="." index="0"]
+texture = ExtResource("2_i61kh")
+
+[node name="ProjectileSpawn" parent="." index="1"]
+position = Vector2(19, 1)
+
+[node name="ShotSoundPlayer" parent="." index="2"]
+stream = ExtResource("3_sjegg")
