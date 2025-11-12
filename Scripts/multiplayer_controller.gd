@@ -1,5 +1,7 @@
 extends Control
 
+signal start_pressed
+
 # @export var ip_address = "127.0.0.1"
 
 const MAX_CONNECTIONS = 4
@@ -19,15 +21,20 @@ func _ready() -> void:
 
 	if "--server" in OS.get_cmdline_args():
 		host_game()
+
+	# Register this controller with the GameManager so it can listen for start signals
+	if GameManager:
+		GameManager.register_controller(self)
 		
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 
 # Clinet and Server
 func _on_player_connected(id):
 	print("Player connected " + str(id))
+	_update_lobby_labels()
 
 func _on_player_disconnected(id):
 	print("Player disconnected " + str(id))
@@ -36,11 +43,13 @@ func _on_player_disconnected(id):
 	for player in all_players:
 		if player.name == str(id):
 			player.queue_free()
+	_update_lobby_labels()
 
 # Clinet only
 func _on_connected_ok():
 	print("Connected to server successfully")
 	send_player_info.rpc_id(1, multiplayer.get_unique_id(), $ButtonsMapLayer/NameBox.text)
+	_update_lobby_labels()
 
 func _on_connected_fail():
 	print("Failed to connect to server")
@@ -53,6 +62,7 @@ func _on_server_disconnected():
 func _on_host_button_down():
 	host_game()
 	send_player_info(multiplayer.get_unique_id(), $ButtonsMapLayer/NameBox.text)
+	_update_lobby_labels()
 
 func _on_join_button_down(address = ""):	
 	if address.is_empty():
@@ -67,15 +77,20 @@ func _on_join_button_down(address = ""):
 	pass
 
 func _on_start_button_down():
-	start_game.rpc()
+	# Emit a local signal that GameManager listens to. GameManager will request the server to start the match.
+	emit_signal("start_pressed")
 	pass
 
 @rpc("any_peer", "call_local")
-func start_game(game_scene_file_path: String = "") -> void:
-	if game_scene_file_path.is_empty():
-		game_scene_file_path = DEFAULT_SCENE_FILE_PATH
-
-	get_tree().change_scene_to_file(game_scene_file_path)
+func start_game(_game_scene_file_path: String = "") -> void:
+	# Instead of directly changing scenes on every peer, request the server to start the match.
+	# Server will handle scene loading for all peers via GameManager.
+	if multiplayer.get_unique_id() == 1:
+		# If this is the server, request directly (will call start_match on server)
+		GameManager.rpc_request_start_match()
+	else:
+		# Ask the server (peer id 1) to start the match
+		GameManager.rpc_request_start_match.rpc_id(1)
 
 
 func host_game():
@@ -101,3 +116,77 @@ func send_player_info(id, player_name):
 	if multiplayer.is_server():
 		for i in GameManager.connected_players:
 			send_player_info.rpc(i, GameManager.connected_players[i].player_name)
+		# Also push a scoreboard update so all peers see names as they join
+		GameManager.rpc_update_scoreboard()
+
+	# Refresh the lobby UI when player list changes
+	_update_lobby_labels()
+
+
+func _get_lobby_vbox() -> VBoxContainer:
+	# Find a VBoxContainer child that contains at least 4 Label nodes.
+	for child in get_children():
+		if child is VBoxContainer:
+			var label_count := 0
+			for gc in child.get_children():
+				if gc is Label:
+					label_count += 1
+			if label_count >= 4:
+				return child
+	# Fallback: search recursively in the scene
+	var all_nodes := get_tree().get_nodes_in_group("")
+	for n in all_nodes:
+		if n is VBoxContainer:
+			var label_count := 0
+			for gc in n.get_children():
+				if gc is Label:
+					label_count += 1
+			if label_count >= 4:
+				return n
+	return null
+
+
+func _sort_keys_numeric(a, b) -> int:
+	var ai := 0
+	var bi := 0
+	if str(a).is_valid_int():
+		ai = int(str(a))
+	if str(b).is_valid_int():
+		bi = int(str(b))
+	return ai - bi
+
+
+func _update_lobby_labels() -> void:
+	var vbox := _get_lobby_vbox()
+	if not vbox:
+		return
+	# Collect label children in order
+	var labels := []
+	for c in vbox.get_children():
+		if c is Label:
+			labels.append(c)
+	if labels.size() == 0:
+		return
+
+	# Build a sorted list of player ids
+	var keys := []
+	for k in GameManager.connected_players:
+		keys.append(k)
+	if keys.size() > 1:
+		keys.sort_custom(Callable(self, "_sort_keys_numeric"))
+
+	# Fill labels (up to labels.size())
+	for i in range(labels.size()):
+		var text := ""
+		if i < keys.size():
+			var key = keys[i]
+			var info = GameManager.connected_players[key]
+			var display_name := ""
+			if typeof(info) == TYPE_DICTIONARY and info.has("player_name"):
+				display_name = str(info.player_name)
+			else:
+				display_name = str(key)
+			if display_name.strip_edges() == "":
+				display_name = str(key)
+			text = display_name
+		labels[i].text = text

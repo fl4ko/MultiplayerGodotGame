@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal died(player_id)
+
 @export var projectile: PackedScene
 @export var starting_gun: PackedScene
 
@@ -32,6 +34,11 @@ var ammo_signal_source: Node = null
 func _ready() -> void:
 	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
 	add_to_group("Player")
+
+	# Register with GameManager so it can listen for this player's death (server will handle it)
+	if GameManager:
+		# call register_player on GameManager; GameManager will decide whether to connect based on authority
+		GameManager.register_player(self)
 
 	if starting_gun:
 		equip_starting_gun()
@@ -307,3 +314,12 @@ func handle_death():
 	play_death_sound.rpc()
 	drop_gun()
 	$CollisionBox.disabled = true
+
+	# Notify GameManager (and any local listeners) that this player has died
+	var pid: int = -1
+	if name and str(name).is_valid_int():
+		pid = int(str(name))
+	else:
+		# fallback to multiplayer id if name isn't numeric
+		pid = multiplayer.get_unique_id()
+	emit_signal("died", pid)
