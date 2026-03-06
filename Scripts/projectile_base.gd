@@ -1,29 +1,25 @@
 extends Area2D
 class_name ProjectileBase
 
-# --- exported parameters (safe names) ---
-@export var bullet_speed: float = 900.0              # pixels per second
-@export var direction: int = 1                       # 1 = right, -1 = left
-@export var bullet_range: float = 800.0              # total distance before despawn
-@export var projectile_gravity: float = 0.0              # downward acceleration (pixels/s^2)
-@export var drop_start_distance: float = 0.0         # distance before gravity applies
+@export var bullet_speed: float = 900.0
+@export var direction: int = 1
+@export var bullet_range: float = 800.0
+@export var projectile_gravity: float = 0.0
+@export var drop_start_distance: float = 0.0
 @export var damage: int = 1
 
-# --- internal state ---
 var travelled: float = 0.0
 var velocity: Vector2 = Vector2.ZERO
 var prev_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	# Only set the default velocity if it wasn't initialized by setup_from_gun
 	if velocity == Vector2.ZERO:
 		velocity = Vector2(bullet_speed * direction, 0)
 	prev_position = global_position
 	monitoring = true
 
 func _physics_process(delta: float) -> void:
-	# Apply gravity after specified distance
 	if projectile_gravity != 0.0 and travelled >= drop_start_distance:
 		velocity.y += projectile_gravity * delta
 
@@ -58,7 +54,6 @@ func _on_hit(result: Dictionary) -> void:
 			collider.handle_being_hit(direction)
 	queue_free()
 
-# helper to initialize projectile from a gun
 func setup_from_gun(
 	p_speed: float,
 	p_dir: int,
@@ -75,9 +70,7 @@ func setup_from_gun(
 	damage = p_damage
 	drop_start_distance = p_drop_start
 
-	# If an angle is provided (degrees), compute the velocity vector accordingly.
 	var angle_rad: float = deg_to_rad(p_angle_deg)
 	velocity = Vector2(cos(angle_rad), sin(angle_rad)) * bullet_speed
-	# fallback: ensure direction matches horizontal sign
 	if velocity.x != 0:
 		direction = int(sign(velocity.x))

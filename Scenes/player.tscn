@@ -126,3 +126,10 @@ replication_config = SubResource("SceneReplicationConfig_6ryv6")
 
 [node name="DeathSoundPlayer" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("5_uwkhh")
+
+[node name="AmmoBar" type="ProgressBar" parent="."]
+offset_left = -10.0
+offset_top = -11.0
+offset_right = 11.0
+offset_bottom = -7.0
+show_percentage = false
