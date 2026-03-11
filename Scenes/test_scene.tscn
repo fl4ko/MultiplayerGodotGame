@@ -429,7 +429,9 @@ scale = Vector2(2.4, 2.4)
 position = Vector2(740, 387)
 scale = Vector2(2.5, 2.5)
 
-[node name="WinnerLabel" type="Label" parent="."]
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="WinnerLabel" type="Label" parent="HUD"]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -440,67 +442,67 @@ offset_bottom = 150.0
 grow_horizontal = 2
 label_settings = SubResource("LabelSettings_jripc")
 
-[node name="Scoreboard" type="VBoxContainer" parent="."]
+[node name="Scoreboard" type="VBoxContainer" parent="HUD"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 11.0
-offset_top = 63.0
-offset_right = 194.0
-offset_bottom = 219.0
+offset_left = -896.0
+offset_top = -476.0
+offset_right = -713.0
+offset_bottom = -319.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 15
 metadata/_edit_use_anchors_ = true
 
-[node name="Player1" type="HBoxContainer" parent="Scoreboard"]
+[node name="Player1" type="HBoxContainer" parent="HUD/Scoreboard"]
 layout_mode = 2
 
-[node name="PlayerName" type="Label" parent="Scoreboard/Player1"]
+[node name="PlayerName" type="Label" parent="HUD/Scoreboard/Player1"]
 layout_mode = 2
 text = "Player1"
 label_settings = SubResource("LabelSettings_qn5h3")
 
-[node name="PlayerScore" type="Label" parent="Scoreboard/Player1"]
+[node name="PlayerScore" type="Label" parent="HUD/Scoreboard/Player1"]
 layout_mode = 2
 text = "0"
 
-[node name="Player2" type="HBoxContainer" parent="Scoreboard"]
+[node name="Player2" type="HBoxContainer" parent="HUD/Scoreboard"]
 layout_mode = 2
 
-[node name="PlayerName" type="Label" parent="Scoreboard/Player2"]
+[node name="PlayerName" type="Label" parent="HUD/Scoreboard/Player2"]
 layout_mode = 2
 text = "Player1"
 label_settings = SubResource("LabelSettings_yrgwk")
 
-[node name="PlayerScore" type="Label" parent="Scoreboard/Player2"]
+[node name="PlayerScore" type="Label" parent="HUD/Scoreboard/Player2"]
 layout_mode = 2
 text = "0"
 
-[node name="Player3" type="HBoxContainer" parent="Scoreboard"]
+[node name="Player3" type="HBoxContainer" parent="HUD/Scoreboard"]
 layout_mode = 2
 
-[node name="PlayerName" type="Label" parent="Scoreboard/Player3"]
+[node name="PlayerName" type="Label" parent="HUD/Scoreboard/Player3"]
 layout_mode = 2
 text = "Player1"
 label_settings = SubResource("LabelSettings_kmlpm")
 
-[node name="PlayerScore" type="Label" parent="Scoreboard/Player3"]
+[node name="PlayerScore" type="Label" parent="HUD/Scoreboard/Player3"]
 layout_mode = 2
 text = "0"
 
-[node name="Player4" type="HBoxContainer" parent="Scoreboard"]
+[node name="Player4" type="HBoxContainer" parent="HUD/Scoreboard"]
 layout_mode = 2
 
-[node name="PlayerName" type="Label" parent="Scoreboard/Player4"]
+[node name="PlayerName" type="Label" parent="HUD/Scoreboard/Player4"]
 layout_mode = 2
 text = "Player1"
 label_settings = SubResource("LabelSettings_25tok")
 
-[node name="PlayerScore" type="Label" parent="Scoreboard/Player4"]
+[node name="PlayerScore" type="Label" parent="HUD/Scoreboard/Player4"]
 layout_mode = 2
 text = "0"
 

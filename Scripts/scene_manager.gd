@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func update_scoreboard(board: Dictionary, _round_num: int) -> void:
-	var scoreboard_node = get_node("Scoreboard")
+	var scoreboard_node = get_node("HUD/Scoreboard")
 
 	var entries := []
 	for k in board:

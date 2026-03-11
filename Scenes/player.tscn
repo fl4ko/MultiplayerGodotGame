@@ -124,6 +124,11 @@ position = Vector2(4.81481, 6.2963)
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_6ryv6")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
 [node name="DeathSoundPlayer" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("5_uwkhh")
 

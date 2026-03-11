@@ -154,9 +154,7 @@ func rpc_show_winner_label(winner_id: int) -> void:
 	if not scene:
 		return
 
-	var label := scene.get_node_or_null("WinnerLabel")
-	if not label:
-		return
+	var label := scene.get_node("HUD/WinnerLabel")
 
 	var winner_text := "Brak zwycięzcy"
 

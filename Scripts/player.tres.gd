@@ -11,6 +11,7 @@ signal died(player_id)
 @onready var player: CharacterBody2D = $"."
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var ammo_bar: ProgressBar = $AmmoBar
+@onready var camera: Camera2D = $Camera2D
 
 @export var speed: float = 230.0
 @export_range(0, 1) var deceleration: float = 0.4
@@ -37,6 +38,8 @@ func _ready() -> void:
 
 	if starting_gun:
 		equip_starting_gun()
+
+	camera.enabled = is_local_player()
 
 	ammo_bar.visible = false
 	anim.play("default")
