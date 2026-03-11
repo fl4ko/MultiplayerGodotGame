@@ -218,9 +218,9 @@ func pick_up(by_player: Node) -> void:
 		# Match player facing
 		var desired_dir := 1
 		if by_player:
-			var facing = by_player.get("facing_right")
-			if typeof(facing) == TYPE_BOOL and facing == false:
-				desired_dir = -1
+			var player_anim: AnimatedSprite2D = by_player.get_node_or_null("AnimatedSprite2D")
+			if player_anim:
+				desired_dir = -1 if player_anim.flip_h else 1
 		# Read current facing
 		var current_dir := int(sign(global_transform.basis_xform(Vector2.RIGHT).x))
 		if current_dir == 0:
