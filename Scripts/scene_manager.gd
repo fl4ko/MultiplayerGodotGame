@@ -4,10 +4,11 @@ extends Node2D
 
 func _ready() -> void:
 	var player_counter = 0
-	
-	for player in GameManager.connected_players:
+	var player_ids := _get_player_ids_for_round()
+
+	for player_id in player_ids:
 		var current_player = player_scene.instantiate()
-		current_player.name = str(GameManager.connected_players[player].id)
+		current_player.name = str(player_id)
 		add_child(current_player)
 
 		for spawn_location in get_tree().get_nodes_in_group("SpawnPoint"):
@@ -22,6 +23,21 @@ func _ready() -> void:
 	var deathbox := get_node_or_null("DeathBox")
 	if not deathbox.is_connected("body_entered", Callable(self, "_on_deathbox_body_entered")):
 		deathbox.connect("body_entered", Callable(self, "_on_deathbox_body_entered"))
+
+
+func _get_player_ids_for_round() -> Array[int]:
+	var ids: Array[int] = []
+
+	for id in GameManager.connected_players.keys():
+		ids.append(int(id))
+
+	if ids.size() == 0:
+		ids.append(multiplayer.get_unique_id())
+		for peer_id in multiplayer.get_peers():
+			ids.append(int(peer_id))
+
+	ids.sort()
+	return ids
 
 
 func update_scoreboard(board: Dictionary, _round_num: int) -> void:
