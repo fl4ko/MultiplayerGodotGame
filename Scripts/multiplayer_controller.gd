@@ -15,7 +15,7 @@ var _pending_join_ip: String = ""
 var _pending_join_port: int = DEFAULT_PORT
 var _should_retry_localhost: bool = false
 
-@onready var player_list: VBoxContainer = $PlayerList
+@onready var player_list: VBoxContainer = $LobbyPanel/LobbyContainer/PlayerList
 @onready var menu_panel: Control = $MainMenuPanel
 @onready var join_panel: Control = $JoinPanel
 @onready var lobby_panel: Control = $LobbyPanel
