@@ -4,9 +4,13 @@ var connected_players = {}
 @export var min_players: int = 2
 @export var max_players: int = 4
 @export var rounds_to_win: int = 3
+@export var min_rounds_to_win: int = 1
+@export var max_rounds_to_win: int = 10
 @export var round_restart_delay: float = 3.0
 @export var round_scene_path: String = "res://MultiplayerGodotGame/Scenes/test_scene.tscn"
 @export var control_scene_path: String = "res://MultiplayerGodotGame/Scenes/Multiplayer/control.tscn"
+
+var lobby_settings: Dictionary = {}
 
 var scores: Dictionary = {}
 var round_active: bool = false
@@ -18,6 +22,51 @@ var _last_started_round: int = -1
 var _last_scoreboard: Dictionary = {}
 var _last_round_num: int = 0
 var return_to_lobby_after_match: bool = false
+
+func _ready() -> void:
+	_apply_lobby_settings({"rounds_to_win": rounds_to_win})
+
+func get_lobby_settings_snapshot() -> Dictionary:
+	return lobby_settings.duplicate(true)
+
+func set_lobby_setting(setting_key: String, setting_value: Variant) -> void:
+	if not multiplayer.is_server():
+		return
+
+	var updated_settings := lobby_settings.duplicate(true)
+	updated_settings[setting_key] = setting_value
+	_apply_lobby_settings(updated_settings)
+	broadcast_lobby_settings()
+
+func sync_lobby_settings_to_peer(peer_id: int) -> void:
+	if not multiplayer.is_server():
+		return
+	rpc_receive_lobby_settings.rpc_id(peer_id, get_lobby_settings_snapshot())
+
+func broadcast_lobby_settings() -> void:
+	if not multiplayer.is_server():
+		return
+	rpc_receive_lobby_settings.rpc(get_lobby_settings_snapshot())
+
+@rpc("authority", "call_local")
+func rpc_receive_lobby_settings(new_settings: Dictionary) -> void:
+	_apply_lobby_settings(new_settings)
+	call_deferred("notify_lobby_ui_refresh")
+
+func _apply_lobby_settings(new_settings: Dictionary) -> void:
+	var normalized_settings := lobby_settings.duplicate(true)
+	if normalized_settings.is_empty():
+		normalized_settings = {"rounds_to_win": rounds_to_win}
+
+	if new_settings.has("rounds_to_win"):
+		normalized_settings["rounds_to_win"] = clampi(
+			int(new_settings["rounds_to_win"]),
+			min_rounds_to_win,
+			max_rounds_to_win
+		)
+
+	lobby_settings = normalized_settings
+	rounds_to_win = int(lobby_settings.get("rounds_to_win", rounds_to_win))
 
 func register_controller(controller: Node) -> void:
 	if controller and controller.has_signal("start_pressed"):

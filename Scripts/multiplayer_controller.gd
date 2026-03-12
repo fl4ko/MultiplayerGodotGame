@@ -14,6 +14,7 @@ var is_lobby_host: bool = false
 var _pending_join_ip: String = ""
 var _pending_join_port: int = DEFAULT_PORT
 var _should_retry_localhost: bool = false
+var _is_updating_rounds_ui: bool = false
 
 @onready var player_list: VBoxContainer = $LobbyPanel/LobbyContainer/PlayerList
 @onready var menu_panel: Control = $MainMenuPanel
@@ -24,6 +25,7 @@ var _should_retry_localhost: bool = false
 @onready var join_code_input: LineEdit = $JoinPanel/JoinContainer/JoinCodeInput
 @onready var join_status_label: Label = $JoinPanel/JoinContainer/JoinStatusLabel
 @onready var lobby_code_value_label: Label = $LobbyPanel/LobbyContainer/JoinCodeRow/JoinCodeValue
+@onready var rounds_to_win_spinbox: SpinBox = $LobbyPanel/LobbyContainer/SettingsRow/RoundsToWinSpinBox
 @onready var lobby_status_label: Label = $LobbyPanel/LobbyContainer/LobbyStatusLabel
 @onready var start_button: Button = $LobbyPanel/LobbyContainer/LobbyButtons/StartButton
 
@@ -48,11 +50,14 @@ func _ready() -> void:
 	else:
 		show_main_menu()
 	update_lobby_labels()
+	_refresh_lobby_settings_ui()
 
 # Clinet and Server
 
 func _on_player_connected(id):
 	print("Player connected " + str(id))
+	if multiplayer.is_server() and GameManager:
+		GameManager.sync_lobby_settings_to_peer(id)
 	update_lobby_labels()
 
 func _on_player_disconnected(id):
@@ -99,9 +104,12 @@ func _on_host_button_down() -> void:
 	host_game()
 	is_lobby_host = true
 	send_player_info(multiplayer.get_unique_id(), name_box.text)
+	if GameManager:
+		GameManager.set_lobby_setting("rounds_to_win", int(rounds_to_win_spinbox.value))
 	lobby_status_label.text = "Lobby created. Share the join code."
 	show_lobby()
 	update_lobby_labels()
+	_refresh_lobby_settings_ui()
 
 func _on_join_button_down(address = ""):
 	var code := join_code_input.text.strip_edges()
@@ -154,6 +162,7 @@ func _on_copy_code_button_down() -> void:
 
 func refresh_lobby_from_gamemanager() -> void:
 	update_lobby_labels()
+	_refresh_lobby_settings_ui()
 	if multiplayer.multiplayer_peer == null:
 		show_main_menu()
 	else:
@@ -217,6 +226,30 @@ func update_lobby_labels():
 			lobby_status_label.text = "Players connected: %d" % ids.size()
 		elif multiplayer.multiplayer_peer != null:
 			lobby_status_label.text = "Waiting for host to start the match..."
+
+	_refresh_lobby_settings_ui()
+
+func _refresh_lobby_settings_ui() -> void:
+	if rounds_to_win_spinbox == null:
+		return
+
+	if GameManager:
+		rounds_to_win_spinbox.min_value = GameManager.min_rounds_to_win
+		rounds_to_win_spinbox.max_value = GameManager.max_rounds_to_win
+		_is_updating_rounds_ui = true
+		rounds_to_win_spinbox.value = GameManager.rounds_to_win
+		_is_updating_rounds_ui = false
+
+	rounds_to_win_spinbox.editable = multiplayer.is_server()
+
+func _on_rounds_to_win_spin_box_value_changed(value: float) -> void:
+	if _is_updating_rounds_ui:
+		return
+	if not multiplayer.is_server():
+		return
+	if GameManager:
+		GameManager.set_lobby_setting("rounds_to_win", int(value))
+	_refresh_lobby_settings_ui()
 
 func show_main_menu() -> void:
 	menu_panel.visible = true
