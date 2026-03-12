@@ -29,8 +29,12 @@ var is_dead: bool = false
 
 var ammo_signal_source: Node = null
 
+func _enter_tree() -> void:
+	_apply_network_authority()
+
+
 func _ready() -> void:
-	$MultiplayerSynchronizer.set_multiplayer_authority(str(name).to_int())
+	_apply_network_authority()
 	add_to_group("Player")
 
 	if GameManager:
@@ -43,6 +47,19 @@ func _ready() -> void:
 
 	ammo_bar.visible = false
 	anim.play("default")
+	print("Player ready name=", name, " local_id=", multiplayer.get_unique_id(), " authority=", get_multiplayer_authority(), " is_local=", is_multiplayer_authority())
+
+
+func _apply_network_authority() -> void:
+	if not str(name).is_valid_int():
+		return
+	var authority_id := str(name).to_int()
+	if authority_id <= 0:
+		return
+	set_multiplayer_authority(authority_id)
+	var sync := get_node_or_null("MultiplayerSynchronizer")
+	if sync:
+		sync.set_multiplayer_authority(authority_id)
 
 func equip_starting_gun():
 	for child in gun.get_children():
@@ -155,7 +172,7 @@ func clear_ammo_bar() -> void:
 
 
 func is_local_player() -> bool:
-	return $MultiplayerSynchronizer.get_multiplayer_authority() == multiplayer.get_unique_id()
+	return is_multiplayer_authority()
 
 func try_throw_or_pickup() -> void:
 	if is_holding_gun and current_gun:
