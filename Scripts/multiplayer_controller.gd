@@ -41,7 +41,12 @@ func _ready() -> void:
 		GameManager.register_controller(self)
 		
 	add_to_group("LobbyController")
-	show_main_menu()
+	if GameManager and GameManager.return_to_lobby_after_match and multiplayer.multiplayer_peer != null:
+		GameManager.return_to_lobby_after_match = false
+		is_lobby_host = multiplayer.is_server()
+		show_lobby()
+	else:
+		show_main_menu()
 	update_lobby_labels()
 
 # Clinet and Server

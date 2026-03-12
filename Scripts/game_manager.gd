@@ -17,6 +17,7 @@ var _match_active: bool = false
 var _last_started_round: int = -1
 var _last_scoreboard: Dictionary = {}
 var _last_round_num: int = 0
+var return_to_lobby_after_match: bool = false
 
 func register_controller(controller: Node) -> void:
 	if controller and controller.has_signal("start_pressed"):
@@ -82,6 +83,7 @@ func _on_controller_start_pressed() -> void:
 
 func start_match() -> void:
 	print("GM: starting match")
+	return_to_lobby_after_match = false
 	scores.clear()
 	for id in connected_players:
 		scores[id] = 0
@@ -198,6 +200,7 @@ func push_cached_scoreboard_to_scene() -> void:
 @rpc("any_peer", "call_local")
 func rpc_end_match(winner_id: int) -> void:
 	print("rpc_end_match: winner is", winner_id, "- returning to control scene")
+	return_to_lobby_after_match = true
 	get_tree().change_scene_to_file(control_scene_path)
 	call_deferred("notify_lobby_ui_refresh")
 
